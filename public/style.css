@@ -271,6 +271,9 @@ dialog form { display: grid; gap: 12px; }
 .dialog-title { font-size: 1.8rem; color: var(--ink); }
 dialog label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-soft); }
 .dialog-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.import-box { border-top: 1.5px dashed var(--line); padding-top: 10px; }
+.import-box input[type="file"] { font-size: 13px; padding: 6px; }
+dialog input { width: 100%; min-width: 0; }
 .spacer { flex: 1; }
 
 #toast {

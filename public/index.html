@@ -151,6 +151,12 @@
       <label>Titre <input name="title" required maxlength="60"></label>
       <label>Objectif (nombre de ✓) <input type="number" name="goal" min="1" placeholder="auto = habitudes × jours"></label>
       <p id="dialogError" class="red small"></p>
+      <div class="import-box">
+        <label>Importer d'anciennes données (fichier .json)
+          <input type="file" id="importFile" accept=".json,application/json">
+        </label>
+        <p id="importResult" class="muted small"></p>
+      </div>
       <div class="dialog-actions">
         <button type="button" id="deletePeriodBtn" class="btn danger">Réinitialiser le mois</button>
         <span class="spacer"></span>

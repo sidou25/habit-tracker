@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
   });
 });
 
-app.use(express.json({ limit: '100kb' }));
+app.use(express.json({ limit: '1mb' })); // 1 Mo : assez pour importer une année de données
 
 // avant toute route /api : configuration présente et base prête (sinon message clair, pas de crash)
 app.use('/api', (req, res, next) => {

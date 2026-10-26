@@ -21,13 +21,24 @@ const limiter = rateLimit({
 
 const wrap = fn => (req, res, next) => fn(req, res, next).catch(next);
 
+// administrateurs : noms listés dans ADMIN_USERNAMES (ex : "sidou" ou "sidou,amine") ;
+// si la variable est vide, c'est le premier compte créé sur le site
+async function computeIsAdmin(user) {
+  const admins = (process.env.ADMIN_USERNAMES || '').split(',').map(n => n.trim().toLowerCase()).filter(Boolean);
+  if (admins.length) return admins.includes(user.username);
+  const { rows } = await pool.query('SELECT min(id) AS first FROM users');
+  return rows[0].first === user.id;
+}
+
 // nouvelle session après connexion (évite la fixation de session)
-function startSession(req, user) {
+async function startSession(req, user) {
+  const isAdmin = await computeIsAdmin(user);
   return new Promise((resolve, reject) => {
     req.session.regenerate(err => {
       if (err) return reject(err);
       req.session.userId = user.id;
       req.session.username = user.username;
+      req.session.isAdmin = isAdmin;
       req.session.save(err2 => (err2 ? reject(err2) : resolve()));
     });
   });
@@ -88,14 +99,8 @@ router.get('/me', (req, res) => {
   res.json(whoAmI(req));
 });
 
-// administrateurs : noms listés dans la variable ADMIN_USERNAMES (ex : "sidou" ou "sidou,amine")
-function isAdmin(req) {
-  const admins = (process.env.ADMIN_USERNAMES || '').split(',').map(n => n.trim().toLowerCase()).filter(Boolean);
-  return Boolean(req.session.userId) && admins.includes(req.session.username);
-}
-
 function whoAmI(req) {
-  return { username: req.session.username, isAdmin: isAdmin(req) };
+  return { username: req.session.username, isAdmin: Boolean(req.session.isAdmin) };
 }
 
 // à placer devant les routes réservées aux utilisateurs connectés
@@ -106,7 +111,7 @@ function requireAuth(req, res, next) {
 
 function requireAdmin(req, res, next) {
   if (!req.session.userId) return res.status(401).json({ error: 'Connecte-toi d\'abord' });
-  if (!isAdmin(req)) return res.status(403).json({ error: 'Accès réservé à l\'administrateur' });
+  if (!req.session.isAdmin) return res.status(403).json({ error: 'Accès réservé à l\'administrateur' });
   next();
 }
 

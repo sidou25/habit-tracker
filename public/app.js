@@ -474,6 +474,29 @@ $('#deletePeriodBtn').addEventListener('click', async () => {
 
 $('#cancelDialog').addEventListener('click', () => dialog.close());
 
+// importer un ancien fichier data/db.json dans son compte
+$('#importFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  $('#importResult').textContent = 'Import en cours…';
+  try {
+    const data = JSON.parse(await file.text());
+    const results = await api('POST', '/api/import', { periods: data.periods });
+    const done = results.filter(r => r.status === 'importé');
+    $('#importResult').textContent = done.length
+      ? 'Importé : ' + done.map(r => `${r.month} (${r.checks} cases)`).join(', ')
+      : 'Rien à importer : mois vides ou déjà remplis.';
+    if (done.length) {
+      state.months = await api('GET', '/api/months');
+      await reloadMonth();
+      toast('Données importées');
+    }
+  } catch (err) {
+    $('#importResult').textContent = err instanceof SyntaxError ? 'Ce fichier n\'est pas un JSON valide' : err.message;
+  }
+  e.target.value = '';
+});
+
 // ---------- Thème jour / nuit ----------
 
 function isDark() {

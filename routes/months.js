@@ -2,6 +2,7 @@
 const express = require('express');
 const { pool, transaction } = require('../db');
 const { requireAuth, wrap } = require('./auth');
+const { importForUser } = require('../importer');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -288,6 +289,14 @@ router.put('/periods/:id/weight', wrap(async (req, res) => {
   }
   await pool.query('DELETE FROM weights WHERE month_id = $1 AND day = $2', [m.id, date]);
   res.json({ date, value: null });
+}));
+
+// ---------- Import d'un ancien fichier JSON ----------
+
+router.post('/import', wrap(async (req, res) => {
+  const periods = req.body && req.body.periods;
+  if (!Array.isArray(periods)) return res.status(400).json({ error: 'Fichier invalide : il doit contenir "periods"' });
+  res.json(await importForUser(req.session.userId, periods));
 }));
 
 module.exports = router;
