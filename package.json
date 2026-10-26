@@ -1,0 +1,26 @@
+{
+  "name": "habit-tracker",
+  "version": "1.0.0",
+  "description": "Suivi d'habitudes mensuel, multi-utilisateurs (Express + PostgreSQL)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --env-file-if-exists=.env --watch server.js",
+    "db": "node scripts/local-db.mjs",
+    "import-json": "node --env-file-if-exists=.env scripts/import-json.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "connect-pg-simple": "^10.0.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.7.1",
+    "express-session": "^1.19.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "embedded-postgres": "^18.4.0-beta.17"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Habit Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // thème choisi (jour / nuit) appliqué avant l'affichage
+    try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+  </script>
+</head>
+<body>
+  <!-- Motif zellige (étoile à 8 branches), réutilisé par les frises -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <pattern id="zellige" width="36" height="36" patternUnits="userSpaceOnUse">
+        <rect width="36" height="36" fill="var(--z-bg)"/>
+        <g transform="translate(18 18)">
+          <rect x="-8" y="-8" width="16" height="16" fill="var(--z1)"/>
+          <rect x="-8" y="-8" width="16" height="16" fill="var(--z1)" transform="rotate(45)"/>
+          <rect x="-4.5" y="-4.5" width="9" height="9" fill="var(--z-bg)" transform="rotate(22.5)"/>
+          <circle r="2.6" fill="var(--z4)"/>
+        </g>
+        <g fill="var(--z2)">
+          <path d="M0 -6 6 0 0 6 -6 0Z"/>
+          <path d="M36 -6 42 0 36 6 30 0Z"/>
+          <path d="M0 30 6 36 0 42 -6 36Z"/>
+          <path d="M36 30 42 36 36 42 30 36Z"/>
+        </g>
+        <g fill="var(--z3)">
+          <path d="M18 -3 21 0 18 3 15 0Z"/>
+          <path d="M18 33 21 36 18 39 15 36Z"/>
+          <path d="M0 15 3 18 0 21 -3 18Z"/>
+          <path d="M36 15 39 18 36 21 33 18Z"/>
+        </g>
+      </pattern>
+    </defs>
+  </svg>
+
+  <header class="topbar">
+    <div class="brand">Habit <span class="ar" lang="ar">عاداتي</span></div>
+    <div class="year-nav app-only">
+      <button id="prevYear" class="btn icon" aria-label="Année précédente">‹</button>
+      <span id="yearLabel"></span>
+      <button id="nextYear" class="btn icon" aria-label="Année suivante">›</button>
+    </div>
+    <div class="top-actions">
+      <span id="userName" class="user app-only"></span>
+      <button id="editPeriodBtn" class="btn app-only">✎ Modifier le mois</button>
+      <button id="logoutBtn" class="btn app-only">Déconnexion</button>
+      <button id="themeBtn" class="btn icon" title="Jour / nuit" aria-label="Changer le thème">☾</button>
+    </div>
+  </header>
+  <svg class="frieze" aria-hidden="true"><rect width="100%" height="100%" fill="url(#zellige)"/></svg>
+
+  <!-- Connexion / inscription -->
+  <section id="authView" class="auth" hidden>
+    <div class="auth-card">
+      <h1>Bienvenue <span class="ar" lang="ar">مرحبا</span></h1>
+      <p class="muted">Ton tableau d'habitudes, sur ton téléphone et ton PC.</p>
+      <div class="auth-tabs" role="tablist">
+        <button type="button" class="auth-tab active" data-mode="login">Connexion</button>
+        <button type="button" class="auth-tab" data-mode="register">Créer un compte</button>
+      </div>
+      <form id="authForm">
+        <label>Nom d'utilisateur
+          <input name="username" autocomplete="username" required minlength="3" maxlength="30"
+            pattern="[A-Za-z0-9._\-]+" title="Lettres, chiffres, . _ -" autocapitalize="none">
+        </label>
+        <label>Mot de passe
+          <input name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="200">
+        </label>
+        <p id="authHint" class="muted small" hidden>Au moins 8 caractères.</p>
+        <p id="authError" class="red small"></p>
+        <button class="btn primary" id="authSubmit">Se connecter</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="page app-only">
+    <nav class="month-tabs" id="monthTabs" aria-label="Mois de l'année"></nav>
+
+    <main class="sheet">
+      <!-- Résumé : titre, graphique hebdo, objectif, donut -->
+      <section class="summary">
+        <div class="box title-box">
+          <div class="month-nav">
+            <button id="prevMonth" class="btn icon" aria-label="Mois précédent">‹</button>
+            <h1 id="periodTitle"></h1>
+            <button id="nextMonth" class="btn icon" aria-label="Mois suivant">›</button>
+          </div>
+          <p id="periodRange" class="muted"></p>
+          <p id="todayInfo" class="muted small"></p>
+        </div>
+        <div class="box chart-box">
+          <h2>Progression par semaine</h2>
+          <div id="weekChart"></div>
+        </div>
+        <div class="box goal-box">
+          <div class="goal-row"><span>Objectif</span><strong id="goalVal"></strong></div>
+          <div class="goal-row"><span>Complété</span><strong id="doneVal" class="pen"></strong></div>
+          <div class="goal-row"><span>Restant</span><strong id="leftVal"></strong></div>
+          <div class="goal-row"><span>Ratés</span><strong id="missVal" class="red"></strong></div>
+        </div>
+        <div class="box donut-box">
+          <h2>Global</h2>
+          <div id="donut"></div>
+        </div>
+      </section>
+
+      <!-- Le tableau -->
+      <section class="table-section">
+        <div class="table-tools">
+          <span class="muted small">Clique une case : vide → ✓ → ✗ → vide · Humeur : content → neutre → triste → vide</span>
+          <button id="todayBtn" class="btn small">Aller à aujourd'hui</button>
+        </div>
+        <div class="table-scroll" id="tableScroll">
+          <table id="grid"></table>
+        </div>
+        <form id="addHabitForm" class="add-habit">
+          <input id="newHabit" placeholder="Nouvelle habitude (ex : Lire 20 min)" maxlength="60" required>
+          <button class="btn primary">Ajouter</button>
+        </form>
+      </section>
+
+      <!-- Classement + notes -->
+      <section class="bottom">
+        <div class="box">
+          <h2>Classement des habitudes</h2>
+          <div id="ranking"></div>
+        </div>
+        <div class="box">
+          <h2>Notes du mois</h2>
+          <textarea id="notes" rows="7" placeholder="Objectifs, réflexions, ce qui a marché…"></textarea>
+          <p id="notesStatus" class="muted small"></p>
+        </div>
+      </section>
+
+      <svg class="frieze" aria-hidden="true"><rect width="100%" height="100%" fill="url(#zellige)"/></svg>
+    </main>
+  </div>
+
+  <!-- Dialogue : modifier le mois -->
+  <dialog id="periodDialog">
+    <form id="periodForm">
+      <h2 class="dialog-title">Modifier le mois</h2>
+      <label>Titre <input name="title" required maxlength="60"></label>
+      <label>Objectif (nombre de ✓) <input type="number" name="goal" min="1" placeholder="auto = habitudes × jours"></label>
+      <p id="dialogError" class="red small"></p>
+      <div class="dialog-actions">
+        <button type="button" id="deletePeriodBtn" class="btn danger">Réinitialiser le mois</button>
+        <span class="spacer"></span>
+        <button type="button" id="cancelDialog" class="btn">Annuler</button>
+        <button class="btn primary">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
