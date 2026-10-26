@@ -82,6 +82,7 @@ h2 { font: 700 1.35rem var(--hand); color: var(--ink-soft); margin-bottom: 6px; 
   padding: 6px 14px;
 }
 .btn:hover { background: var(--pen-soft); border-color: var(--pen); }
+a.btn { text-decoration: none; display: inline-block; }
 .btn.primary { background: var(--pen); border-color: var(--pen); color: var(--paper); }
 .btn.primary:hover { filter: brightness(1.1); }
 .btn.danger { color: var(--red); border-color: var(--red); }
@@ -246,6 +247,19 @@ body.logged-out .app-only, [hidden] { display: none !important; }
 #authForm input { font-size: 16px; } /* 16px : pas de zoom automatique sur iPhone */
 #authForm .btn.primary { padding: 10px; font-size: 15px; }
 #authForm .btn:disabled { opacity: .6; cursor: wait; }
+
+/* ---------- Page admin ---------- */
+.admin-head { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .admin-head { grid-template-columns: 1fr; } }
+.admin-head h1 { margin-bottom: 6px; }
+#search { max-width: 260px; }
+.admin-table { width: 100%; table-layout: auto; }
+.admin-table th, .admin-table td { height: auto; padding: 7px 12px; text-align: left; white-space: nowrap; }
+.admin-table thead th { font: 700 1.2rem var(--hand); color: var(--ink-soft); border-bottom: 2px solid var(--line-strong); }
+.admin-table .num { text-align: right; font: 700 1.2rem var(--hand); }
+.admin-table .name { font: 700 1.3rem var(--hand); }
+.admin-table tbody tr:hover { background: var(--pen-soft); }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); vertical-align: middle; }
 
 /* ---------- Dialogue, toast ---------- */
 dialog {

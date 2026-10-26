@@ -52,7 +52,7 @@ router.post('/register', limiter, wrap(async (req, res) => {
   let user;
   try {
     const { rows } = await pool.query(
-      'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
+      'INSERT INTO users (username, password_hash, last_login) VALUES ($1, $2, now()) RETURNING id, username',
       [username, hash],
     );
     user = rows[0];
@@ -61,7 +61,7 @@ router.post('/register', limiter, wrap(async (req, res) => {
     throw err;
   }
   await startSession(req, user);
-  res.status(201).json({ username: user.username });
+  res.status(201).json(whoAmI(req));
 }));
 
 router.post('/login', limiter, wrap(async (req, res) => {
@@ -70,8 +70,9 @@ router.post('/login', limiter, wrap(async (req, res) => {
   const user = rows[0];
   const ok = await bcrypt.compare(password, user ? user.password_hash : DUMMY_HASH);
   if (!user || !ok) return res.status(401).json({ error: 'Nom ou mot de passe incorrect' });
+  await pool.query('UPDATE users SET last_login = now() WHERE id = $1', [user.id]);
   await startSession(req, user);
-  res.json({ username: user.username });
+  res.json(whoAmI(req));
 }));
 
 router.post('/logout', (req, res, next) => {
@@ -84,8 +85,18 @@ router.post('/logout', (req, res, next) => {
 
 router.get('/me', (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: 'Non connecté' });
-  res.json({ username: req.session.username });
+  res.json(whoAmI(req));
 });
+
+// administrateurs : noms listés dans la variable ADMIN_USERNAMES (ex : "sidou" ou "sidou,amine")
+function isAdmin(req) {
+  const admins = (process.env.ADMIN_USERNAMES || '').split(',').map(n => n.trim().toLowerCase()).filter(Boolean);
+  return Boolean(req.session.userId) && admins.includes(req.session.username);
+}
+
+function whoAmI(req) {
+  return { username: req.session.username, isAdmin: isAdmin(req) };
+}
 
 // à placer devant les routes réservées aux utilisateurs connectés
 function requireAuth(req, res, next) {
@@ -93,4 +104,10 @@ function requireAuth(req, res, next) {
   next();
 }
 
-module.exports = { router, requireAuth, wrap };
+function requireAdmin(req, res, next) {
+  if (!req.session.userId) return res.status(401).json({ error: 'Connecte-toi d\'abord' });
+  if (!isAdmin(req)) return res.status(403).json({ error: 'Accès réservé à l\'administrateur' });
+  next();
+}
+
+module.exports = { router, requireAuth, requireAdmin, wrap };

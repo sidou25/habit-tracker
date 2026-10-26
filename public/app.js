@@ -499,10 +499,11 @@ function showAuth() {
   dialog.close();
 }
 
-function showApp(username) {
+function showApp(user) {
   document.body.classList.remove('logged-out');
   $('#authView').hidden = true;
-  $('#userName').textContent = username;
+  $('#userName').textContent = user.username;
+  $('#adminLink').hidden = !user.isAdmin;
   let startMonth = todayISO().slice(0, 7);
   try { startMonth = localStorage.getItem('month') || startMonth; } catch {}
   openMonth(startMonth).catch(err => toast(err.message));
@@ -527,7 +528,7 @@ $('#authForm').addEventListener('submit', async e => {
   try {
     const user = await api('POST', `/api/auth/${authMode}`, { username: f.username.value, password: f.password.value });
     f.password.value = '';
-    showApp(user.username);
+    showApp(user);
   } catch (err) {
     $('#authError').textContent = err.message;
   } finally {
@@ -543,7 +544,7 @@ $('#logoutBtn').addEventListener('click', async () => {
 // ---------- Démarrage ----------
 
 api('GET', '/api/auth/me')
-  .then(me => showApp(me.username))
+  .then(me => showApp(me))
   .catch(err => {
     showAuth();
     // problème de configuration du serveur (base, secret) : l'afficher tout de suite

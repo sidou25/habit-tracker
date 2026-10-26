@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMPTZ;  -- ajoutée pour la page admin
 
 -- un mois d'un utilisateur ("2026-10")
 CREATE TABLE IF NOT EXISTS months (

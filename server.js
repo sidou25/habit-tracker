@@ -7,6 +7,7 @@ const PgSession = require('connect-pg-simple')(session);
 const { pool, init } = require('./db');
 const auth = require('./routes/auth');
 const months = require('./routes/months');
+const admin = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,6 +55,7 @@ app.use(session({
 }));
 
 app.use('/api/auth', auth.router);
+app.use('/api/admin', admin);
 app.use('/api', months);
 app.use('/api', (req, res) => res.status(404).json({ error: 'Route inconnue' }));
 

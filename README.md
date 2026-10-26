@@ -15,6 +15,7 @@ Front-end en HTML/CSS/JS, back-end Express, données dans PostgreSQL.
 - Statistiques par habitude : total, %, série actuelle et meilleure série, classement
 - Notes du mois sauvegardées automatiquement
 - Design feuille jaune + frise zellige ; mode nuit avec le bouton ☾ ; utilisable sur téléphone
+- Page admin (`/admin.html`) : liste des comptes et de leur activité, suppression d'un compte
 
 ## Structure
 
@@ -25,6 +26,7 @@ Front-end en HTML/CSS/JS, back-end Express, données dans PostgreSQL.
 | `schema.sql` | Les tables : `users`, `months`, `habits`, `checks`, `moods`, `weights` |
 | `routes/auth.js` | `/api/auth/register`, `/login`, `/logout`, `/me` (bcrypt + session) |
 | `routes/months.js` | `/api/months`, `/api/periods/...` : mois, habitudes, cases, humeur, poids |
+| `routes/admin.js` | `/api/admin/users` : comptes et activité (réservé aux admins) |
 | `public/` | La page (HTML, CSS, JavaScript) |
 | `scripts/local-db.mjs` | PostgreSQL local pour le développement |
 | `scripts/import-json.js` | Importe l'ancien `data/db.json` dans un compte |
@@ -78,12 +80,23 @@ Il faut deux variables d'environnement :
    ```bash
    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
    ```
-3. Redéployer (**Deployments → … → Redeploy**, ou un nouveau `git push`).
+3. **`ADMIN_USERNAMES`** (facultatif) : ton nom d'utilisateur, pour accéder à la page admin.
+   ⚠️ Crée d'abord ton compte sur le site, *puis* ajoute la variable : sinon quelqu'un d'autre
+   pourrait créer un compte avec ce nom avant toi et devenir admin.
+4. Redéployer (**Deployments → … → Redeploy**, ou un nouveau `git push`).
    Les tables sont créées automatiquement à la première requête.
 
 Si une variable manque, le site ne plante plus : l'écran de connexion affiche laquelle.
 
 `render.yaml` permet aussi d'héberger sur Render (*New → Blueprint*) avec une base Neon.
+
+## Page admin
+
+Réservée aux noms listés dans `ADMIN_USERNAMES` (ex : `sidou` ou `sidou,amine`).
+Un bouton **Admin** apparaît alors dans l'en-tête du tableau.
+Elle montre pour chaque compte : date d'inscription, dernière connexion, nombre de mois, de ✓, de ✗,
+d'humeurs et la date de la dernière case. Elle ne montre jamais les notes, l'humeur ou le poids.
+Supprimer un compte efface toutes ses données et le déconnecte partout.
 
 ## Sécurité
 
@@ -92,3 +105,4 @@ Si une variable manque, le site ne plante plus : l'écran de connexion affiche l
 - Max 20 tentatives de connexion / 15 min par adresse IP
 - Toutes les requêtes SQL sont paramétrées (`$1`, `$2`…) : pas d'injection SQL
 - Chaque route vérifie que le mois appartient à l'utilisateur connecté
+- Les routes `/api/admin` répondent 401 sans connexion et 403 à un compte non admin
