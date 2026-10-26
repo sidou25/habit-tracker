@@ -544,4 +544,8 @@ $('#logoutBtn').addEventListener('click', async () => {
 
 api('GET', '/api/auth/me')
   .then(me => showApp(me.username))
-  .catch(() => showAuth());
+  .catch(err => {
+    showAuth();
+    // problème de configuration du serveur (base, secret) : l'afficher tout de suite
+    if (err.message !== 'Non connecté') $('#authError').textContent = err.message;
+  });

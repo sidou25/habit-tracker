@@ -62,25 +62,28 @@ npm run import-json -- <nom_utilisateur> data/db.json
 Les mois vides sont ignorés. Un mois déjà rempli dans le compte n'est jamais écrasé.
 Pour importer dans la base en ligne, remplacer temporairement `DATABASE_URL` dans `.env` par l'adresse Neon.
 
-## Mettre en ligne (gratuit)
+## Mettre en ligne sur Vercel (gratuit)
 
-1. **Base de données — [Neon](https://neon.tech)** : créer un compte, puis un projet. Copier la
-   *connection string* (`postgresql://...neon.tech/neondb?sslmode=require`).
-2. **Code — GitHub** : créer un dépôt vide, puis pousser ce dossier :
+Le projet est relié au dépôt GitHub : chaque `git push` sur `main` redéploie le site.
+Sur Vercel, `server.js` exporte l'app Express, qui devient une fonction serverless ;
+le dossier `public/` est servi par le CDN de Vercel.
+
+Il faut deux variables d'environnement :
+
+1. **`DATABASE_URL`** : dans le projet Vercel, onglet **Storage → Create Database → Neon**
+   (Postgres serverless, offre gratuite), puis **Connect** au projet `habit-tracker`.
+   Vercel ajoute `DATABASE_URL` tout seul.
+2. **`SESSION_SECRET`** : **Settings → Environment Variables → Add**, nom `SESSION_SECRET`,
+   valeur = une longue chaîne aléatoire générée avec :
    ```bash
-   git add -A
-   git commit -m "Habit Tracker multi-utilisateurs"
-   git remote add origin https://github.com/<ton-compte>/habit-tracker.git
-   git push -u origin main
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
    ```
-3. **Hébergement — [Render](https://render.com)** : *New → Blueprint*, choisir le dépôt GitHub.
-   Render lit `render.yaml` et demande `DATABASE_URL` : coller l'adresse Neon.
-   `SESSION_SECRET` est généré automatiquement.
-4. Le site est en ligne sur `https://habit-tracker-xxxx.onrender.com`. Les tables sont créées au premier démarrage.
+3. Redéployer (**Deployments → … → Redeploy**, ou un nouveau `git push`).
+   Les tables sont créées automatiquement à la première requête.
 
-Remarques sur l'offre gratuite de Render : le site s'endort après 15 min sans visite et le premier
-chargement prend ~50 s. Les données ne sont pas touchées : elles sont chez Neon.
-Chaque `git push` sur `main` redéploie le site automatiquement.
+Si une variable manque, le site ne plante plus : l'écran de connexion affiche laquelle.
+
+`render.yaml` permet aussi d'héberger sur Render (*New → Blueprint*) avec une base Neon.
 
 ## Sécurité
 

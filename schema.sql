@@ -41,6 +41,14 @@ CREATE TABLE IF NOT EXISTS moods (
   PRIMARY KEY (month_id, day)
 );
 
+-- sessions de connexion (format attendu par connect-pg-simple)
+CREATE TABLE IF NOT EXISTS "session" (
+  "sid"    VARCHAR NOT NULL PRIMARY KEY,
+  "sess"   JSON NOT NULL,
+  "expire" TIMESTAMP(6) NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire");
+
 -- poids d'une semaine, rangé au premier jour de la semaine
 CREATE TABLE IF NOT EXISTS weights (
   month_id INTEGER NOT NULL REFERENCES months(id) ON DELETE CASCADE,
