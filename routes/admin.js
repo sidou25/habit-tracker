@@ -8,7 +8,7 @@ router.use(requireAdmin);
 
 router.get('/users', wrap(async (req, res) => {
   const { rows } = await pool.query(`
-    SELECT u.id, u.username, u.created_at, u.last_login,
+    SELECT u.id, u.username, u.created_at, u.last_login, u.is_admin,
       (SELECT count(*) FROM months m WHERE m.user_id = u.id)::int AS months,
       (SELECT count(*) FROM moods mo JOIN months m ON m.id = mo.month_id WHERE m.user_id = u.id)::int AS moods,
       COALESCE(s.done, 0)::int AS done,

@@ -93,8 +93,10 @@ Si une variable manque, le site ne plante plus : l'écran de connexion affiche l
 
 ## Page admin
 
-Réservée au premier compte créé sur le site, ou aux noms listés dans `ADMIN_USERNAMES` si la variable existe.
-Un bouton **Admin** apparaît alors dans l'en-tête du tableau.
+Bouton **Admin** dans l'en-tête du tableau : il demande le **code admin** (variable secrète `ADMIN_CODE`
+sur Vercel, jamais écrite dans le code). Avec le bon code, le compte connecté devient admin pour de bon.
+5 mauvais codes maximum par quart d'heure.
+Sont aussi admins : le premier compte créé (si `ADMIN_USERNAMES` est vide) ou les noms de `ADMIN_USERNAMES`.
 Elle montre pour chaque compte : date d'inscription, dernière connexion, nombre de mois, de ✓, de ✗,
 d'humeurs et la date de la dernière case. Elle ne montre jamais les notes, l'humeur ou le poids.
 Supprimer un compte efface toutes ses données et le déconnecte partout.

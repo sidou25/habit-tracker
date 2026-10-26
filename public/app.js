@@ -526,7 +526,7 @@ function showApp(user) {
   document.body.classList.remove('logged-out');
   $('#authView').hidden = true;
   $('#userName').textContent = user.username;
-  $('#adminLink').hidden = !user.isAdmin;
+  state.isAdmin = user.isAdmin;
   let startMonth = todayISO().slice(0, 7);
   try { startMonth = localStorage.getItem('month') || startMonth; } catch {}
   openMonth(startMonth).catch(err => toast(err.message));
@@ -563,6 +563,37 @@ $('#logoutBtn').addEventListener('click', async () => {
   try { await api('POST', '/api/auth/logout'); } catch {}
   showAuth();
 });
+
+// ---------- Bouton Admin : accès direct si admin, sinon demande du code ----------
+
+const codeDialog = $('#adminCodeDialog');
+const codeForm = $('#adminCodeForm');
+
+$('#adminLink').addEventListener('click', e => {
+  if (state.isAdmin) return; // le lien ouvre /admin.html
+  e.preventDefault();
+  codeForm.reset();
+  $('#adminCodeError').textContent = '';
+  codeDialog.showModal();
+  codeForm.code.focus();
+});
+
+codeForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  $('#adminCodeSubmit').disabled = true;
+  try {
+    await api('POST', '/api/auth/admin-code', { code: codeForm.code.value });
+    state.isAdmin = true;
+    location.href = '/admin.html';
+  } catch (err) {
+    $('#adminCodeError').textContent = err.message;
+    codeForm.code.select();
+  } finally {
+    $('#adminCodeSubmit').disabled = false;
+  }
+});
+
+$('#adminCodeCancel').addEventListener('click', () => codeDialog.close());
 
 // ---------- Démarrage ----------
 

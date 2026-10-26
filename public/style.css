@@ -259,6 +259,10 @@ body.logged-out .app-only, [hidden] { display: none !important; }
 .admin-table .num { text-align: right; font: 700 1.2rem var(--hand); }
 .admin-table .name { font: 700 1.3rem var(--hand); }
 .admin-table tbody tr:hover { background: var(--pen-soft); }
+.badge { font: 600 11px var(--ui); color: var(--pen); border: 1px solid var(--pen); border-radius: 6px; padding: 0 5px; vertical-align: middle; }
+.code-form { display: grid; gap: 10px; text-align: left; }
+.code-form label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-soft); }
+.code-form input { font-size: 16px; }
 .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); vertical-align: middle; }
 
 /* ---------- Dialogue, toast ---------- */

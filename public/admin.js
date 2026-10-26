@@ -50,7 +50,7 @@ function renderTable() {
   for (const u of list) {
     const isMe = u.id === state.me;
     h += `<tr>
-      <td class="name">${esc(u.username)}${isMe ? ' <span class="muted small">(toi)</span>' : ''}</td>
+      <td class="name">${esc(u.username)}${u.is_admin ? ' <span class="badge">admin</span>' : ''}${isMe ? ' <span class="muted small">(toi)</span>' : ''}</td>
       <td>${fmtDate(u.created_at)}</td>
       <td>${fmtDate(u.last_login)}${recent(u.last_login) ? ' <span class="dot" title="Connecté cette semaine"></span>' : ''}</td>
       <td class="num">${u.months}</td>
@@ -70,16 +70,38 @@ async function load() {
     const data = await api('GET', '/api/admin/users');
     state.me = data.me;
     state.users = data.users;
+    $('#deniedView').hidden = true;
     $('#adminView').hidden = false;
     renderStats();
     renderTable();
   } catch (err) {
     $('#deniedView').hidden = false;
+    $('#codeForm').hidden = err.status !== 403; // connecté mais pas admin : on demande le code
     $('#deniedText').textContent = err.status === 401
-      ? 'Connecte-toi d\'abord sur le tableau, avec ton compte administrateur.'
-      : err.status === 403 ? 'Cette page est réservée à l\'administrateur du site.' : err.message;
+      ? 'Connecte-toi d\'abord sur le tableau, avec ton compte.'
+      : err.status === 403 ? 'Entre le code admin pour accéder à cette page.' : err.message;
   }
 }
+
+$('#codeForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('#codeSubmit').disabled = true;
+  try {
+    const res = await fetch('/api/auth/admin-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: e.target.code.value }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || 'Erreur serveur');
+    await load();
+  } catch (err) {
+    $('#codeError').textContent = err.message;
+    e.target.code.select();
+  } finally {
+    $('#codeSubmit').disabled = false;
+  }
+});
 
 $('#search').addEventListener('input', renderTable);
 

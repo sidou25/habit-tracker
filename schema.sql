@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMPTZ;  -- ajoutée pour la page admin
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT false;  -- donné par le code admin
 
 -- un mois d'un utilisateur ("2026-10")
 CREATE TABLE IF NOT EXISTS months (

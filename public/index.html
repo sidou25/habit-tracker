@@ -49,7 +49,7 @@
     </div>
     <div class="top-actions">
       <span id="userName" class="user app-only"></span>
-      <a id="adminLink" class="btn app-only" href="/admin.html" hidden>Admin</a>
+      <a id="adminLink" class="btn app-only" href="/admin.html">Admin</a>
       <button id="editPeriodBtn" class="btn app-only">✎ Modifier le mois</button>
       <button id="logoutBtn" class="btn app-only">Déconnexion</button>
       <button id="themeBtn" class="btn icon" title="Jour / nuit" aria-label="Changer le thème">☾</button>
@@ -162,6 +162,22 @@
         <span class="spacer"></span>
         <button type="button" id="cancelDialog" class="btn">Annuler</button>
         <button class="btn primary">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Dialogue : code admin -->
+  <dialog id="adminCodeDialog">
+    <form id="adminCodeForm">
+      <h2 class="dialog-title">Espace admin</h2>
+      <label>Code admin
+        <input name="code" type="password" inputmode="numeric" autocomplete="off" required maxlength="50">
+      </label>
+      <p id="adminCodeError" class="red small"></p>
+      <div class="dialog-actions">
+        <span class="spacer"></span>
+        <button type="button" id="adminCodeCancel" class="btn">Annuler</button>
+        <button class="btn primary" id="adminCodeSubmit">Entrer</button>
       </div>
     </form>
   </dialog>

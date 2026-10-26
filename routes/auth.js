@@ -1,4 +1,5 @@
-// Comptes : inscription, connexion, déconnexion (session stockée dans PostgreSQL)
+// Comptes : inscription, connexion, déconnexion (session stockée dans PostgreSQL), droit admin
+const crypto = require('crypto');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { rateLimit } = require('express-rate-limit');
@@ -19,29 +20,43 @@ const limiter = rateLimit({
   message: { error: 'Trop de tentatives, réessaie dans 15 minutes' },
 });
 
+// le code admin est court : seulement 5 essais / 15 min par adresse IP
+const codeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  skipSuccessfulRequests: true, // seuls les mauvais codes comptent
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Trop d\'essais, réessaie dans 15 minutes' },
+});
+
 const wrap = fn => (req, res, next) => fn(req, res, next).catch(next);
 
-// administrateurs : noms listés dans ADMIN_USERNAMES (ex : "sidou" ou "sidou,amine") ;
-// si la variable est vide, c'est le premier compte créé sur le site
-async function computeIsAdmin(user) {
+// est admin : un compte qui a donné le code admin, un nom listé dans ADMIN_USERNAMES,
+// ou (si ADMIN_USERNAMES est vide) le premier compte créé. Vérifié à chaque requête.
+async function isAdminUser(userId, username) {
   const admins = (process.env.ADMIN_USERNAMES || '').split(',').map(n => n.trim().toLowerCase()).filter(Boolean);
-  if (admins.length) return admins.includes(user.username);
-  const { rows } = await pool.query('SELECT min(id) AS first FROM users');
-  return rows[0].first === user.id;
+  if (admins.includes(username)) return true;
+  const { rows } = await pool.query(
+    'SELECT is_admin, id = (SELECT min(id) FROM users) AS first FROM users WHERE id = $1', [userId]);
+  if (!rows[0]) return false;
+  return rows[0].is_admin || (!admins.length && rows[0].first);
 }
 
 // nouvelle session après connexion (évite la fixation de session)
-async function startSession(req, user) {
-  const isAdmin = await computeIsAdmin(user);
+function startSession(req, user) {
   return new Promise((resolve, reject) => {
     req.session.regenerate(err => {
       if (err) return reject(err);
       req.session.userId = user.id;
       req.session.username = user.username;
-      req.session.isAdmin = isAdmin;
       req.session.save(err2 => (err2 ? reject(err2) : resolve()));
     });
   });
+}
+
+async function whoAmI(req) {
+  return { username: req.session.username, isAdmin: await isAdminUser(req.session.userId, req.session.username) };
 }
 
 function readCredentials(req) {
@@ -72,7 +87,7 @@ router.post('/register', limiter, wrap(async (req, res) => {
     throw err;
   }
   await startSession(req, user);
-  res.status(201).json(whoAmI(req));
+  res.status(201).json(await whoAmI(req));
 }));
 
 router.post('/login', limiter, wrap(async (req, res) => {
@@ -83,7 +98,7 @@ router.post('/login', limiter, wrap(async (req, res) => {
   if (!user || !ok) return res.status(401).json({ error: 'Nom ou mot de passe incorrect' });
   await pool.query('UPDATE users SET last_login = now() WHERE id = $1', [user.id]);
   await startSession(req, user);
-  res.json(whoAmI(req));
+  res.json(await whoAmI(req));
 }));
 
 router.post('/logout', (req, res, next) => {
@@ -94,14 +109,24 @@ router.post('/logout', (req, res, next) => {
   });
 });
 
-router.get('/me', (req, res) => {
+router.get('/me', wrap(async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: 'Non connecté' });
-  res.json(whoAmI(req));
-});
+  res.json(await whoAmI(req));
+}));
 
-function whoAmI(req) {
-  return { username: req.session.username, isAdmin: Boolean(req.session.isAdmin) };
-}
+// code admin (variable ADMIN_CODE, jamais écrite dans le code) : le compte connecté devient admin
+router.post('/admin-code', codeLimiter, wrap(async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Connecte-toi d\'abord' });
+  const expected = String(process.env.ADMIN_CODE || '');
+  if (!expected) return res.status(503).json({ error: 'Code admin non configuré sur le serveur' });
+  // comparaison à temps constant (sur les empreintes, pour avoir la même longueur)
+  const hash = s => crypto.createHash('sha256').update(s).digest();
+  if (!crypto.timingSafeEqual(hash(String(req.body.code || '').trim()), hash(expected))) {
+    return res.status(403).json({ error: 'Code incorrect' });
+  }
+  await pool.query('UPDATE users SET is_admin = true WHERE id = $1', [req.session.userId]);
+  res.json({ isAdmin: true });
+}));
 
 // à placer devant les routes réservées aux utilisateurs connectés
 function requireAuth(req, res, next) {
@@ -109,10 +134,12 @@ function requireAuth(req, res, next) {
   next();
 }
 
-function requireAdmin(req, res, next) {
+const requireAdmin = wrap(async (req, res, next) => {
   if (!req.session.userId) return res.status(401).json({ error: 'Connecte-toi d\'abord' });
-  if (!req.session.isAdmin) return res.status(403).json({ error: 'Accès réservé à l\'administrateur' });
+  if (!(await isAdminUser(req.session.userId, req.session.username))) {
+    return res.status(403).json({ error: 'Accès réservé à l\'administrateur' });
+  }
   next();
-}
+});
 
 module.exports = { router, requireAuth, requireAdmin, wrap };

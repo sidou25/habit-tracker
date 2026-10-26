@@ -82,7 +82,14 @@
       <div class="auth-card">
         <h1>Accès réservé</h1>
         <p class="muted" id="deniedText"></p>
-        <a class="btn primary" href="/">Retour au tableau</a>
+        <form id="codeForm" class="code-form" hidden>
+          <label>Code admin
+            <input name="code" type="password" inputmode="numeric" autocomplete="off" required maxlength="50">
+          </label>
+          <p id="codeError" class="red small"></p>
+          <button class="btn primary" id="codeSubmit">Entrer</button>
+        </form>
+        <a class="btn" href="/">Retour au tableau</a>
       </div>
     </section>
   </div>
