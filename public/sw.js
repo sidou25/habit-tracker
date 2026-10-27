@@ -1,6 +1,6 @@
 // Service worker : l'app s'ouvre même sans réseau (dernière version de la page gardée en cache).
 // Les données (/api) ne passent jamais par le cache : elles viennent toujours du serveur.
-const CACHE = 'habit-v1';
+const CACHE = 'habit-v2';
 const SHELL = ['/', '/style.css', '/app.js', '/manifest.webmanifest', '/icons/icon-192.png'];
 
 self.addEventListener('install', e => {

@@ -507,7 +507,7 @@ function isDark() {
 function updateThemeBtn() {
   $('#themeBtn').textContent = isDark() ? '☀' : '☾';
   // couleur de la barre du téléphone (app installée) assortie au thème
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark() ? '#2f281c' : '#eedc9c');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark() ? '#2f281c' : '#d4e4f1');
 }
 $('#themeBtn').addEventListener('click', () => {
   const t = isDark() ? 'light' : 'dark';

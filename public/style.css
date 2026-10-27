@@ -1,20 +1,20 @@
-/* Feuille jaune, encre brune, stylo bleu, frise zellige — couleurs douces pour les yeux */
+/* Jour : feuille bleu clair, encre bleu nuit, frise zellige — couleurs douces pour les yeux */
 :root {
-  --desk: #e7d9b6;
-  --paper: #f6e8b6;
-  --paper-2: #eedc9c;
-  --ink: #3b2f25;
-  --ink-soft: #6f5d47;
+  --desk: #d3e2ee;
+  --paper: #e6f0f8;
+  --paper-2: #d4e4f1;
+  --ink: #213448;
+  --ink-soft: #52677d;
   --pen: #2e4c8c;
   --pen-soft: rgba(46, 76, 140, .09);
   --red: #b0472f;
   --red-soft: rgba(176, 71, 47, .11);
   --green: #3f7051;
-  --line: rgba(95, 72, 40, .20);
-  --line-strong: rgba(80, 58, 32, .50);
-  --today: rgba(236, 160, 50, .30);
-  --shadow: 0 1px 2px rgba(70, 50, 15, .12), 0 10px 30px rgba(70, 50, 15, .14);
-  --z-bg: #eedc9c;
+  --line: rgba(35, 70, 110, .18);
+  --line-strong: rgba(30, 60, 95, .45);
+  --today: rgba(236, 160, 50, .28);
+  --shadow: 0 1px 2px rgba(25, 55, 90, .12), 0 10px 30px rgba(25, 55, 90, .14);
+  --z-bg: #d4e4f1;
   --z1: #2f5d8a;
   --z2: #b0472f;
   --z3: #3f7051;
@@ -270,7 +270,7 @@ dialog {
   border: 1.5px solid var(--line-strong); border-radius: 16px 6px 14px 8px / 8px 14px 6px 16px;
   background: var(--paper); color: var(--ink); width: min(440px, calc(100vw - 32px)); padding: 20px; box-shadow: var(--shadow);
 }
-dialog::backdrop { background: rgba(30, 20, 5, .45); }
+dialog::backdrop { background: rgba(15, 30, 50, .45); }
 dialog form { display: grid; gap: 12px; }
 .dialog-title { font-size: 1.8rem; color: var(--ink); }
 dialog label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-soft); }
