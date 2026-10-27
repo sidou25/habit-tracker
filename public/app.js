@@ -309,7 +309,9 @@ function renderRanking(s) {
 function scrollToToday() {
   const th = document.querySelector('thead th.is-today');
   const box = $('#tableScroll');
-  box.scrollLeft = th ? Math.max(0, th.offsetLeft - 230 - CELL_W * 6) : 0;
+  // aujourd'hui visible juste après la colonne des noms, avec 2 jours avant
+  const nameW = document.querySelector('.habit-name')?.offsetWidth || 0;
+  box.scrollLeft = th ? Math.max(0, th.offsetLeft - nameW - th.offsetWidth * 2) : 0;
 }
 
 // ---------- Navigation entre les mois ----------
