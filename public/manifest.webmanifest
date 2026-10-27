@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "Habit Tracker — عاداتي",
+  "short_name": "Habit Tracker",
+  "description": "Mon tableau d'habitudes : cases, humeur, poids, mois par mois.",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6e8b6",
+  "theme_color": "#eedc9c",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

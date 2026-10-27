@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Habit Tracker</title>
+  <!-- installable comme une app (Chrome : « Installer l'application ») -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#eedc9c">
+  <link rel="icon" href="/icons/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -49,6 +54,7 @@
     </div>
     <div class="top-actions">
       <span id="userName" class="user app-only"></span>
+      <button id="installBtn" class="btn primary" hidden>⤓ Installer l'app</button>
       <a id="adminLink" class="btn app-only" href="/admin.html">Admin</a>
       <button id="editPeriodBtn" class="btn app-only">✎ Modifier le mois</button>
       <button id="logoutBtn" class="btn app-only">Déconnexion</button>

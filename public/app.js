@@ -504,7 +504,11 @@ $('#importFile').addEventListener('change', async e => {
 function isDark() {
   return document.documentElement.dataset.theme === 'dark';
 }
-function updateThemeBtn() { $('#themeBtn').textContent = isDark() ? '☀' : '☾'; }
+function updateThemeBtn() {
+  $('#themeBtn').textContent = isDark() ? '☀' : '☾';
+  // couleur de la barre du téléphone (app installée) assortie au thème
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark() ? '#2f281c' : '#eedc9c');
+}
 $('#themeBtn').addEventListener('click', () => {
   const t = isDark() ? 'light' : 'dark';
   document.documentElement.dataset.theme = t;
@@ -512,6 +516,25 @@ $('#themeBtn').addEventListener('click', () => {
   updateThemeBtn();
 });
 updateThemeBtn();
+
+// ---------- Installer l'app (Chrome, Android, ordinateur) ----------
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+let installPrompt = null;
+// Chrome prévient quand le site peut être installé : on montre notre bouton
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installPrompt = e;
+  $('#installBtn').hidden = false;
+});
+$('#installBtn').addEventListener('click', async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt = null;
+  $('#installBtn').hidden = true;
+});
+window.addEventListener('appinstalled', () => { $('#installBtn').hidden = true; });
 
 // ---------- Connexion / inscription ----------
 

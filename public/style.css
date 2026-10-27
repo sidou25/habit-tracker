@@ -67,7 +67,7 @@ h2 { font: 700 1.35rem var(--hand); color: var(--ink-soft); margin-bottom: 6px; 
   .brand { font-size: 1.7rem; }
   .brand .ar { font-size: 1.2rem; }
   .year-nav { font-size: 1.4rem; }
-  .top-actions { width: 100%; justify-content: flex-end; }
+  .top-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
   .user { margin-right: auto; }
   .top-actions .btn { padding: 4px 10px; font-size: 13px; }
   .frieze { height: 24px; }
